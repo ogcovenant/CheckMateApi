@@ -37,7 +37,7 @@ export const createUser = async ( req, res, next ) => {
     id: id,
     email: email
   }
-  const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 60 * 60 })
+  const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "7d" })
   const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET) 
 
   try{
