@@ -28,7 +28,7 @@ export const createUser = async ( req, res, next ) => {
     if(existingUser[0]) return res.status(STATUS.conflict).json({ error: "User with email already exists" });
 
   }catch(err){
-    return res.status(STATUS.serverError).json({ err: "error 1" });
+    return res.sendStatus(STATUS.serverError);
   }
 
   const id = nanoid();

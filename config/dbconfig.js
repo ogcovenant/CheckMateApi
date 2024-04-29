@@ -5,7 +5,7 @@ dotenv.config()
 
 const db = await mysql.createConnection({
     host: process.env.DATABASE_URL,
-    user: 'root',
+    user: "root",
     database: 'checkmate',
     password: "CoOg"
 });
