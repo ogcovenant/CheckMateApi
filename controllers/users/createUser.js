@@ -46,7 +46,7 @@ export const createUser = async ( req, res, next ) => {
     return res.status(STATUS.serverError).json({ err });
   }
 
-  res.cookie("jwt", refreshToken, { httpOnly: true, maxAge:14*24*60*60, secure: true, sameSite: "None" })
+  res.cookie("jwt", refreshToken, { httpOnly: true, maxAge:14*24*60*60 })
   res.status(STATUS.ok).json({ msg: "Account Created Successfully", accessToken:accessToken, refreshToken:refreshToken });
 }
 
