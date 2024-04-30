@@ -20,9 +20,7 @@ import { router as tokenRoute } from "./routes/tokenRoute.js"
 
 //route usage
 app.use(authRoute)
-
-app.use(verifyUser)
-app.use("/token", tokenRoute)
+app.use("/token",verifyUser, tokenRoute)
 
 app.get("/", (req, res) => {
   res.status(200).send({ msg: "Welcome To CheckMate ✅" });

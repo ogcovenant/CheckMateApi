@@ -28,7 +28,7 @@ export const refreshTokenHandler = async(req, res) => {
     return res.sendStatus(STATUS.serverError)
   }
 
-  const accessToken = jwt.sign((req.user), process.env.ACCESS_TOKEN_SECRET, { expiresIn: "10s" });
+  const accessToken = jwt.sign((req.user), process.env.ACCESS_TOKEN_SECRET, { expiresIn: "7d" });
 
   res.status(STATUS.ok).json({ accessToken: accessToken });
 }
