@@ -11,9 +11,11 @@ app.use(express.urlencoded({ extended: false }));
 
 //route imports
 import { router as authRoute } from "./routes/authRoute.js";
+import { router as tokenRoute } from "./routes/tokenRoute.js"
 
 //route usage
 app.use(authRoute)
+app.use("/token", tokenRoute)
 
 app.get("/", (req, res) => {
   res.status(200).send({ msg: "Welcome To CheckMate ✅" });

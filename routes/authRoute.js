@@ -1,6 +1,7 @@
 import express from "express"
 import createUser from "../controllers/users/createUser.js"
 import checkUser from "../controllers/users/checkUser.js"
+import refreshTokenHandler from "../controllers/token/refreshTokenHandler.js"
 
 export const router = express.Router()
 
