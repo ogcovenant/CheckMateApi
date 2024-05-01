@@ -7,8 +7,6 @@ export const getTodayTask = async(req, res) => {
   const user = req.user;
   const date = new Date().toLocaleDateString()
 
-  console.log(user)
-
   try{  
 
     const [ tasks ] = await db.query("SELECT * FROM tasks WHERE user_id = ? AND due_date = ?", [ user.id, date ]);
@@ -24,5 +22,23 @@ export const getTodayTask = async(req, res) => {
 }
 
 export const getTomorrowTask = async(req, res) => {
+
+  const user = req.user;
+  const date = new Date();
+  date.setDate(date.getDate() + 1);
+
+  const tomorrowDate = date.toLocaleDateString()
+
+  try{  
+
+    const [ tasks ] = await db.query("SELECT * FROM tasks WHERE user_id = ? AND due_date = ?", [ user.id, tomorrowDate ]);
+    if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
+
+    res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
+
+  }catch(err){
+    console.log(err)
+    return res.sendStatus(STATUS.serverError);
+  }
   
 }
