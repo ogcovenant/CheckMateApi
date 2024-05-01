@@ -1,5 +1,6 @@
 import db from "../../config/dbconfig.js";
 import STATUS from "../../config/statusConfig.js"
+import { getWeekAndDays } from "../../utils/getWeekAndDays.js";
 
 
 export const getTodayTask = async(req, res) => {
@@ -41,4 +42,23 @@ export const getTomorrowTask = async(req, res) => {
     return res.sendStatus(STATUS.serverError);
   }
   
+}
+
+export const getThisWeekTask = async(req, res) => {
+
+  const user = req.user;
+  const date = new Date();  
+
+  const weekDays = getWeekAndDays(date);
+
+  try{  
+    const [ tasks ] = await db.query("SELECT * FROM tasks WHERE user_id = ? AND due_date IN (?)", [ user.id, weekDays ]);
+    if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
+
+    res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
+  }catch(err){
+    console.log(err)
+    return res.sendStatus(STATUS.serverError);
+  }
+
 }
