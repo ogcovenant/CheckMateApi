@@ -44,7 +44,7 @@ export const checkUser = async(req, res) => {
     }
 
     req.user = user;
-    res.cookie("jwt", refreshToken, { httpOnly: true, maxAge: 3600000 })
+    res.cookie("jwt", refreshToken, { httpOnly: true, maxAge: ( 14*24*60*60 ) })
     res.status(STATUS.ok).json({ msg: "Login Successful", accessToken:accessToken, refreshToken:refreshToken });
 
 
