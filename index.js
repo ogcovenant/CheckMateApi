@@ -28,7 +28,7 @@ app.use("/token", tokenRoute)
 
 //routes that uses the verifyUser middleware
 app.use(verifyUser);
-app.use(taskRoute)
+app.use("/tasks",taskRoute)
 
 
 
