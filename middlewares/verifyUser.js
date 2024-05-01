@@ -8,7 +8,7 @@ dotenv.config()
 const verifyUser = ( req, res, next ) => {
   const header = req.headers["authorization"];
 
-  if(!header) return res.sendStatus(STATUS.forbidden)
+  if(!header) return res.sendStatus(STATUS.unauthorized)
 
   const token = header.split(" ")[1];
 

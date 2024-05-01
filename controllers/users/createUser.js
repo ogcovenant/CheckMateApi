@@ -14,7 +14,7 @@ export const createUser = async ( req, res, next ) => {
   const emailRaw = userSchema.validate({ email: req.body.email });
   const passwordRaw = userSchema.validate({ password: req.body.password });
 
-  if(emailRaw.error|| passwordRaw.error ){
+  if(emailRaw.error || passwordRaw.error ){
     return res.status(STATUS.bad).json({ msg: "Invalid values provided" });
   }
 
@@ -33,10 +33,12 @@ export const createUser = async ( req, res, next ) => {
 
   const id = nanoid();
   const hashedPassword = await bcrypt.hash(password, 12);
+
   const user = {
     id: id,
     email: email
   }
+
   const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "7d" })
   const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET) 
 

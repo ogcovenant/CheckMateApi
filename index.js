@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import cookieParser from "cookie-parser";
 
 
+
 //verify JWT middleware import
 import verifyUser from "./middlewares/verifyUser.js";
 
@@ -18,11 +19,18 @@ app.use(cookieParser())
 //route imports
 import { router as authRoute } from "./routes/authRoute.js";
 import { router as tokenRoute } from "./routes/tokenRoute.js"
+import { router as taskRoute } from "./routes/taskRoute.js"
 
 
 //route usage
 app.use(authRoute)
 app.use("/token", tokenRoute)
+
+//routes that uses the verifyUser middleware
+app.use(verifyUser);
+app.use(taskRoute)
+
+
 
 app.get("/", (req, res) => {
   res.status(200).send({ msg: "Welcome To CheckMate ✅" });
