@@ -20,7 +20,8 @@ export const createTask = async(req, res) => {
     due_date: requestBody.due_date,
     no_of_subtasks: 0,
     list_id: requestBody.list_id,
-    user_id: req.user.id
+    user_id: req.user.id,
+    status: "pending"
   }
 
   const titleRaw = taskSchema.validate({ title: task.title });
@@ -41,7 +42,7 @@ export const createTask = async(req, res) => {
   }
 
   try{
-    await db.query("INSERT INTO tasks ( id, title, due_date, no_of_subtasks, list_id, user_id )  VALUES ( ?, ?, ?, ?, ?, ? )", [ task.id, task.title, task.due_date, task.no_of_subtasks, task.list_id, task.user_id ])
+    await db.query("INSERT INTO tasks ( id, title, due_date, no_of_subtasks, list_id, user_id, status )  VALUES ( ?, ?, ?, ?, ?, ? )", [ task.id, task.title, task.due_date, task.no_of_subtasks, task.list_id, task.user_id, task.status ])
   }catch(err){
     return res.sendStatus(STATUS.serverError);
   }
