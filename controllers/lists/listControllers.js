@@ -36,6 +36,17 @@ export const createList = async( req, res ) => {
 
 }
 
-export const getList = ( req, res ) => {
-  
+export const getList = async( req, res ) => {
+  const user = req.user;
+
+  try{  
+    const [ lists ] = await db.query("SELECT * FROM lists WHERE user_id = ?", [ user.id ]);
+    if(!lists[0]) return res.status(STATUS.notFound).json({ error: "No Lists Is Available" });
+
+    res.status(STATUS.ok).json({ msg: "Lists Retrieved Successfully", lists: lists })
+  }catch(err){
+    console.log(err)
+    return res.sendStatus(STATUS.serverError);
+  }
+
 }
