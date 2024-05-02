@@ -28,10 +28,6 @@ export const createTask = async(req, res) => {
   const listIdRaw = taskSchema.validate({ list_id: task.list_id });
 
   if( titleRaw.error || dueDateRaw.error || listIdRaw.error ){
-    console.log(titleRaw.error)
-    console.log(dueDateRaw.error)
-    console.log(noOfSubtasksRaw.error)
-    console.log(listIdRaw.error)
     return res.status(STATUS.bad).json({ error: "Invalid Values Provided" });
   }
 
