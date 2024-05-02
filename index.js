@@ -21,6 +21,7 @@ import { router as authRoute } from "./routes/authRoute.js";
 import { router as tokenRoute } from "./routes/tokenRoute.js"
 import { router as taskRoute } from "./routes/taskRoute.js"
 import { router as listRoute } from "./routes/listRoute.js";
+import { router as subtaskRoute } from "./routes/subtaskRoute.js"
 
 
 //route usage
@@ -31,6 +32,7 @@ app.use("/token", tokenRoute)
 app.use(verifyUser);
 app.use("/tasks",taskRoute)
 app.use("/lists", listRoute)
+app.use("/subtasks", subtaskRoute)
 
 
 
