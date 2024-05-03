@@ -1,3 +1,4 @@
+//an object that stores the status codes
 const statusConfig = {
   status: {
     // infomation
@@ -28,4 +29,5 @@ const statusConfig = {
   },
 };
 
+//exporting the status object
 export default statusConfig.status
