@@ -88,3 +88,71 @@ export const createSubtaskTask = async (req, res) => {
   //returning a success message upon successful creation of the subtask
   res.status(STATUS.ok).json({ msg: "Subtask Added Successfully" })
 }
+
+
+
+//a controller function to delete a subtask
+export const deleteSubtask = async( req, res ) => {
+  //getting the id of the subtask to be deleted
+  const subtaskID = req.params.id;
+
+  //create an array to store the id of the user for security purposes
+  const subtask_id = [ subtaskID ]
+
+  //created a temporary storage to store the no of subtasks and task_id 
+  let no_of_subtasks = 0;
+  let task_id = [];
+  
+  //deleting the subtask and updating the no_of_subtasks from the related task
+  try {
+    //search for selected subtask to see if it exists
+    const [ subtask ] = await db.query("SELECT * FROM subtasks WHERE id = ?", subtask_id);
+
+    //if the specified subtask does not exist return a not found error
+    if(!subtask[0]) return res.status(STATUS.notFound).json({ error: "Could not find specified subtask" });
+
+    //assign the task_id from the subtask to the temporary storage
+    task_id = [ subtask[0].task_id ];
+
+    //search the database for the parent task of the subtask
+    try {
+      //query to get the parent task
+      const [ task ] = await db.query("SELECT * FROM tasks WHERE id = ?", task_id)
+
+      //check if the parent task exists
+      if(!task[0]) return res.status(STATUS.notFound).json({ error: "Could not find the parent task of the specified subtask" });
+
+      //assign the no_of_subtasks to the temporary storage 
+      no_of_subtasks = task[0].no_of_subtasks;
+
+      //delete the subtask and update the parent task no_of_subtasks
+      try {
+        //query to delete the subtask
+        await db.query("DELETE FROM subtasks WHERE id = ?", subtask_id);
+
+        //create an array to store the params to update
+        const taskData = [
+          no_of_subtasks - 1,
+          task_id
+        ]
+
+        //query to update tasks
+        await db.query("UPDATE tasks SET no_of_subtasks = ? WHERE id = ?", taskData)
+
+      } catch (err) {
+        //returning a server error status if any error occurs in the operation
+        return res.sendStatus(STATUS.serverError)
+      }
+
+    } catch (err) {
+      //returning a server error if there's any issue with the operation
+      return res.sendStatus(STATUS.serverError)
+    }
+
+  } catch (err) {
+    //returning a server error if there's any issue with the operation
+    return res.sendStatus(STATUS.serverError)
+  }
+
+  res.status(STATUS.noContent).json({ msg: "Subtask deleted successfully" })
+}
