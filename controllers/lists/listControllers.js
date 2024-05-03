@@ -1,17 +1,23 @@
+//route imports
 import { nanoid } from "nanoid"
 import db from "../../config/dbconfig.js"
 import Joi from "joi"
 import STATUS from "../../config/statusConfig.js"
 
+//created the joi schema for requests validation
 const listSchema = Joi.object({
   title: Joi.string(),
   color: Joi.string()
 })
 
+
+//a controller function to create a list
 export const createList = async( req, res ) => {
 
+  //getting the request body and assigned it to a constant
   const requestBody = req.body;
 
+  //created a list object and passed the relevant attributes to it
   const list = {
     id: nanoid(),
     title: requestBody.title,
@@ -19,22 +25,37 @@ export const createList = async( req, res ) => {
     user_id: req.user.id
   }
 
+  //validated the title and color attribute from the request body
   const titleRaw = listSchema.validate({ title: list.title })
   const color = listSchema.validate({ color: list.color });
 
+  //checking if there's any error with the title and color attributes
   if( titleRaw.error || color.error ){
     return res.status(STATUS.bad).json({ error: "Invalid Values Provided" });
   }
 
+  //creating a list data array to be passed into the query to insert a new list into the database
+  const listData = [
+    list.id,
+    list.title,
+    list.color,
+    list.user_id
+  ];
+
+  //inserting the list data into the database to create a new list
   try{
-    await db.query("INSERT INTO lists ( id, title, color, user_id )  VALUES ( ?, ?, ?, ? )", [ list.id, list.title, list.color, list.user_id ]);
+    //the database query to insert the list
+    await db.query("INSERT INTO lists ( id, title, color, user_id )  VALUES ( ?, ?, ?, ? )", listData);
   }catch(err){
+    //returning a server error status if there's any issue when inserting the list into the database
     return res.sendStatus(STATUS.serverError);
   }
 
+  //returning a success message upon successful entry into the database
   res.status(STATUS.ok).json({ msg: "List Created Successfully" })
-
 }
+
+
 
 export const getList = async( req, res ) => {
   const user = req.user;
