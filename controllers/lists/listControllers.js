@@ -50,3 +50,16 @@ export const getList = async( req, res ) => {
   }
 
 }
+
+export const deleteList = async( req, res ) => {
+  const id = req.params.id;
+  
+  try{
+    await db.query("DELETE FROM lists WHERE id = ?", [ id ]);
+    await db.query("UPDATE tasks SET list_id = ? WHERE list_id = ?", [ "", id ])
+  }catch(err){
+    return res.sendStatus(STATUS.serverError)
+  }
+
+  return res.status(STATUS.ok).json({ msg: "List Deleted Successfully" })
+}

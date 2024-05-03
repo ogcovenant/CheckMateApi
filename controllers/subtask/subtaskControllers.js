@@ -25,10 +25,16 @@ export const createSubtaskTask = async (req, res) => {
     return res.status(STATUS.bad).json({ error: "Invalid Values Provided" });
   }
 
+  let no_of_subtasks = 0;
+  let id = "";
+
   try{
     
     const [task] = await db.query("SELECT * FROM tasks WHERE id = ?", [ subtask.task_id ]);
     if(!task[0]) return res.status(STATUS.notFound).json({ error: "Selected Task Does Not Exist" });
+
+    no_of_subtasks = task[0].no_of_subtasks;
+    id = task[0].id
 
   }catch(err){
     return res.sendStatus(STATUS.serverError);
@@ -36,6 +42,7 @@ export const createSubtaskTask = async (req, res) => {
 
   try{
     await db.query("INSERT INTO subtasks ( id, title, task_id, status )  VALUES ( ?, ?, ?, ? )", [ subtask.id, subtask.title, subtask.task_id, subtask.status ])
+    await db.query("UPDATE tasks SET no_of_subtasks = ? WHERE id = ?", [ no_of_subtasks+1, id ])
   }catch(err){
     return res.sendStatus(STATUS.serverError);
   }
