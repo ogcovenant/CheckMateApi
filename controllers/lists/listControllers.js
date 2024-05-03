@@ -118,42 +118,68 @@ export const deleteList = async( req, res ) => {
 
 
 
-//
+//a controller function to update a list
 export const updateList = async(req, res) => {
 
+  //getting the id of the list to be updated
   const id = req.params.id;
 
+  //getting the request body that contains the data the list should be updated to
   const requestBody = req.body;
+
+  //creating a list object to store the data to be updated
   const list = {
     title: requestBody.title,
     color: requestBody.color
   }
 
+  //validating the parameters to check which of the parameters should be updated
   const titleRaw = listSchema.validate({ title: list.title });
   const colorRaw = listSchema.validate({ color: list.color });
 
+  //checking if the list is present in the database and updating it if it exists
   try{
+    //creating an array to store the listId for security reasons
+    const listID = [ id ]
 
-    const [ existingList ] = await db.query("SELECT * FROM lists WHERE id = ?", [ id ])
+    //query to check if the list exists
+    const [ existingList ] = await db.query("SELECT * FROM lists WHERE id = ?", listID)
+
+    //return a not found status code if the list is not found
     if(!existingList[0]) return res.status(STATUS.notFound).json({ error: "Could Not Find The List To Be Updated" });
 
+    //setting either of the parameters to the default params if they are not to be updated
     if(titleRaw.error) list.title = existingList[0].title
     if(colorRaw.error) list.color = existingList[0].color
 
+    //updating the list in the database
     try{
-      await db.query("UPDATE lists SET title = ?, color = ? WHERE id = ?", [ list.title, list.color, id ])
+      //creating an array to store the updated parameters
+      const listData = [
+        list.title,
+        list.color,
+        id 
+      ]
+
+      //query to update the list
+      await db.query("UPDATE lists SET title = ?, color = ? WHERE id = ?", listData)
     }catch(err){
+      //returning a server error status if there was an error when updating the database
       return res.sendStatus(STATUS.serverError)
     }
 
   }catch(err){
+    //returning a server error status if there was an error in any of the database operations
     return res.sendStatus(STATUS.serverError)
   }
 
+  //returning a success status message upon successful list update 
   res.status(STATUS.ok).json({ msg: "List updated successfully" })
-
 }
 
+
+
+//
 export const getListTasks = async( req, res ) => {
   const id = req.params.id;
 
