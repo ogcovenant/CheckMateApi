@@ -10,7 +10,7 @@ export const getTodayTask = async(req, res) => {
 
   try{  
 
-    const [ tasks ] = await db.query("SELECT * FROM tasks WHERE user_id = ? AND due_date = ?", [ user.id, date ]);
+    const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date = ?;", [ user.id, date ]);
     if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
 
     res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
@@ -32,7 +32,7 @@ export const getTomorrowTask = async(req, res) => {
 
   try{  
 
-    const [ tasks ] = await db.query("SELECT * FROM tasks WHERE user_id = ? AND due_date = ?", [ user.id, tomorrowDate ]);
+    const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date = ?;", [ user.id, tomorrowDate ]);
     if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
 
     res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
@@ -52,7 +52,7 @@ export const getThisWeekTask = async(req, res) => {
   const weekDays = getWeekAndDays(date);
 
   try{  
-    const [ tasks ] = await db.query("SELECT * FROM tasks WHERE user_id = ? AND due_date IN (?)", [ user.id, weekDays ]);
+    const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date IN (?);", [ user.id, weekDays ]);
     if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
 
     res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
