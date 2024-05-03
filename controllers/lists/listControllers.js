@@ -63,3 +63,52 @@ export const deleteList = async( req, res ) => {
 
   return res.status(STATUS.ok).json({ msg: "List Deleted Successfully" })
 }
+
+export const updateList = async(req, res) => {
+
+  const id = req.params.id;
+
+  const requestBody = req.body;
+  const list = {
+    title: requestBody.title,
+    color: requestBody.color
+  }
+
+  const titleRaw = listSchema.validate({ title: list.title });
+  const colorRaw = listSchema.validate({ color: list.color });
+
+  try{
+
+    const [ existingList ] = await db.query("SELECT * FROM lists WHERE id = ?", [ id ])
+    if(!existingList[0]) return res.status(STATUS.notFound).json({ error: "Could Not Find The List To Be Updated" });
+
+    if(titleRaw.error) list.title = existingList[0].title
+    if(colorRaw.error) list.color = existingList[0].color
+
+    try{
+      await db.query("UPDATE lists SET title = ?, color = ? WHERE id = ?", [ list.title, list.color, id ])
+    }catch(err){
+      return res.sendStatus(STATUS.serverError)
+    }
+
+  }catch(err){
+    return res.sendStatus(STATUS.serverError)
+  }
+
+  res.status(STATUS.ok).json({ msg: "List updated successfully" })
+
+}
+
+export const getListTasks = async( req, res ) => {
+  const id = req.params.id;
+
+  try{
+    const [ tasks ] = await db.query("SELECT * FROM tasks WHERE list_id = ?", [ id ]);
+    if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "No tasks were found for this list"})
+
+    return res.status(STATUS.ok).json({ msg: "Tasks retrieved successfully", tasks: tasks });
+
+  }catch(err){
+    return res.sendStatus(STATUS.serverError)
+  }
+}

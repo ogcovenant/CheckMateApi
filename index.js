@@ -1,3 +1,4 @@
+//app imports
 import express from "express"
 import dotenv from "dotenv"
 import cookieParser from "cookie-parser";
@@ -35,13 +36,13 @@ app.use("/lists", listRoute)
 app.use("/subtasks", subtaskRoute)
 
 
-
+//the welcome greeting at the root endpoint of the api
 app.get("/", (req, res) => {
   res.status(200).send({ msg: "Welcome To CheckMate ✅" });
 })
 
 
-
+//server starts to listen for events/requests
 app.listen( PORT, () => {
   console.log("Server Started on port:" + PORT);
 });
