@@ -31,7 +31,7 @@ export const createList = async( req, res ) => {
 
   //checking if there's any error with the title and color attributes
   if( titleRaw.error || color.error ){
-    return res.status(STATUS.bad).json({ error: "Invalid Values Provided" });
+    return res.status(STATUS.notAcceptable).json({ error: "Invalid Values Provided" });
   }
 
   //creating a list data array to be passed into the query to insert a new list into the database
@@ -52,7 +52,7 @@ export const createList = async( req, res ) => {
   }
 
   //returning a success message upon successful entry into the database
-  res.status(STATUS.ok).json({ msg: "List Created Successfully" })
+  res.status(STATUS.created).json({ msg: "List Created Successfully" })
 }
 
 
@@ -112,7 +112,7 @@ export const deleteList = async( req, res ) => {
   }
 
   //returning a success message upon successful deletion of the list
-  return res.status(STATUS.ok).json({ msg: "List Deleted Successfully" })
+  return res.status(STATUS.noContent).json({ msg: "List Deleted Successfully" })
 }
 
 
@@ -174,7 +174,7 @@ export const updateList = async(req, res) => {
   }
 
   //returning a success status message upon successful list update 
-  res.status(STATUS.ok).json({ msg: "List updated successfully" })
+  res.status(STATUS.noContent).json({ msg: "List updated successfully" })
 }
 
 
