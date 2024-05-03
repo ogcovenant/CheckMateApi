@@ -57,20 +57,32 @@ export const createList = async( req, res ) => {
 
 
 
+//a controller function the get an array containing the list of "lists" created by the user 
 export const getList = async( req, res ) => {
-  const user = req.user;
 
+  //getting the user id of the current user
+  const userID = req.user.id;
+
+  //created an array to store the user's id for security purposes
+  const userData = [ userID ]
+
+  //querying the database to fetch the list of "lists"
   try{  
-    const [ lists ] = await db.query("SELECT * FROM lists WHERE user_id = ?", [ user.id ]);
+    //the database query to get the list of "lists" 
+    const [ lists ] = await db.query("SELECT * FROM lists WHERE user_id = ?", userData);
+
+    //returning a not found status if no list was found after the query
     if(!lists[0]) return res.status(STATUS.notFound).json({ error: "No Lists Is Available" });
 
+    //returning a success message and the list of "lists" upon successful query of the database
     res.status(STATUS.ok).json({ msg: "Lists Retrieved Successfully", lists: lists })
   }catch(err){
-    console.log(err)
+    //returning a server error status if there's any issue when getting the list of "lists"
     return res.sendStatus(STATUS.serverError);
   }
-
 }
+
+
 
 export const deleteList = async( req, res ) => {
   const id = req.params.id;
