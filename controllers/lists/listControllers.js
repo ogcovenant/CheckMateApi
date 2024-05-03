@@ -84,19 +84,41 @@ export const getList = async( req, res ) => {
 
 
 
+//a controller function to delete a list
 export const deleteList = async( req, res ) => {
+
+  //getting the id of the list to be deleted
   const id = req.params.id;
   
+  //creating an array that stores the id of the list to be deleted for security purposes
+  const listID = [ id ];
+
+  //creating an array to store the parameters of the update task query
+  const taskUpdateData = [
+    "",
+    id
+  ]
+
+  //deleting the list and setting the tasks that are assigned to that list an empty list value in the database 
   try{
-    await db.query("DELETE FROM lists WHERE id = ?", [ id ]);
-    await db.query("UPDATE tasks SET list_id = ? WHERE list_id = ?", [ "", id ])
+    //the database query to delete the list
+    await db.query("DELETE FROM lists WHERE id = ?", listID);
+
+    //the databse query to update the tasks associated with the list that has been deleted
+    await db.query("UPDATE tasks SET list_id = ? WHERE list_id = ?", taskUpdateData)
   }catch(err){
+    //returning a server error status if there's any issue when performing the database operations
     return res.sendStatus(STATUS.serverError)
   }
 
+  //returning a success message upon successful deletion of the list
   return res.status(STATUS.ok).json({ msg: "List Deleted Successfully" })
 }
 
+
+
+
+//
 export const updateList = async(req, res) => {
 
   const id = req.params.id;
