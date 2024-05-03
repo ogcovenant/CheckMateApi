@@ -179,17 +179,26 @@ export const updateList = async(req, res) => {
 
 
 
-//
+//a controller to get the list of tasks associated with the list
 export const getListTasks = async( req, res ) => {
+  //getting the list's id
   const id = req.params.id;
 
+  //getting the tasks associated with the list from the database
   try{
-    const [ tasks ] = await db.query("SELECT * FROM tasks WHERE list_id = ?", [ id ]);
+    //creating an array to store the id of the list for security purposes
+    const listId = [ id ]
+
+    //query to get the tasks from the database
+    const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE list_id = ?", listId);
+
+    //returning a not found status if there is no task attached to the list 
     if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "No tasks were found for this list"})
 
+    //returning a success status message upon successful retrieval of the tasks 
     return res.status(STATUS.ok).json({ msg: "Tasks retrieved successfully", tasks: tasks });
-
   }catch(err){
+    //returning a server error status if there was an error while performing the database operation
     return res.sendStatus(STATUS.serverError)
   }
 }
