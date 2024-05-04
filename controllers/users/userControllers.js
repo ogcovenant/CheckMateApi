@@ -69,7 +69,6 @@ export const createUser = async ( req, res ) => {
     return res.sendStatus(STATUS.serverError);
   }
 
-  //setting the refresh token as an http only cookie and sending the access token with a success message
-  res.cookie("jwt", refreshToken, { httpOnly: true, maxAge:(14*24*60*60) })
+  //sending the access token with a success message
   res.status(STATUS.ok).json({ msg: "Account Created Successfully", accessToken:accessToken });
 }

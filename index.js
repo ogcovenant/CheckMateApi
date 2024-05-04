@@ -30,7 +30,6 @@ app.use(cookieParser())
 
 //route imports
 import { router as authRoute } from "./routes/authRoute.js";
-import { router as tokenRoute } from "./routes/tokenRoute.js"
 import { router as taskRoute } from "./routes/taskRoute.js"
 import { router as listRoute } from "./routes/listRoute.js";
 import { router as subtaskRoute } from "./routes/subtaskRoute.js"
@@ -38,7 +37,6 @@ import { router as subtaskRoute } from "./routes/subtaskRoute.js"
 
 //route usage
 app.use(authRoute)
-app.use("/token", tokenRoute)
 
 //routes that uses the verifyUser middleware
 app.use(verifyUser);
