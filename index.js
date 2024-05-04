@@ -16,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT;
 app.use(cors({
   origin: ( origin, cb ) => {
-    if (!corsWhitelist.includes(origin) || !origin) {
+    if (corsWhitelist.includes(origin) || !origin) {
       cb(null, true)
     } else {
       cb(new Error('Not allowed by CORS'))
