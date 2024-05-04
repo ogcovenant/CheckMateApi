@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 //created the the subtask Joi Schema for validation later on
 const subtaskSchema = Joi.object({
   title: Joi.string(),
+  status: Joi.string(),
   task_id: Joi.string()
 })
 
@@ -96,7 +97,7 @@ export const deleteSubtask = async( req, res ) => {
   //getting the id of the subtask to be deleted
   const subtaskID = req.params.id;
 
-  //create an array to store the id of the user for security purposes
+  //create an array to store the id of the subtask for security purposes
   const subtask_id = [ subtaskID ]
 
   //created a temporary storage to store the no of subtasks and task_id 
@@ -155,4 +156,62 @@ export const deleteSubtask = async( req, res ) => {
   }
 
   res.status(STATUS.noContent).json({ msg: "Subtask deleted successfully" })
+}
+
+
+
+//a controller function to update a subtasks
+export const updateSubtask = async(req, res) => {
+
+  //getting the id of the subtask to be deleted
+  const subtaskID = [ req.params.id ];
+
+  //creating an object of subtask to store the data to be updated
+  const subtask = {
+    title: req.body.title,
+    status: req.body.status
+  } 
+
+  //validating the request body
+  const titleRaw = subtaskSchema.validate({ title: subtask.title });
+  const statusRaw = subtaskSchema.validate({ status: subtask.status })
+
+  //check if the list to be updated exists and update it if it exists
+  try{
+    //query to select the specified subtask
+    const [ existingSubtask ] = await db.query("SELECT * FROM subtasks WHERE id = ?", [ subtaskID ])
+
+    //sends a not found status if the task is not found
+    if(!existingSubtask[0]) return res.status(STATUS.notFound).json({ error: "Could not find the specified subtask to be updated" });
+
+    //check if the a title or color is present in the request body and assign a default value if one is not specified
+    if(titleRaw.error) subtask.title = existingSubtask[0].title
+    if(statusRaw.error) subtask.status = existingSubtask[0].status
+
+    //update the subtasks
+    try {
+
+      //creating an array to store the subtask data
+      const subtaskData = [
+        subtask.title,
+        subtask.status,
+        subtaskID[0]
+      ]
+
+      //query to update the subtask
+      await db.query("UPDATE subtasks SET title = ?, status = ? WHERE id = ?", subtaskData)
+
+    } catch (err) {
+      //returning a server error if there's any issue with the operation
+      return res.sendStatus(STATUS.serverError)
+    }
+
+  }catch(err){
+    console.log(err)
+    //return a server error if an error occurs
+    return res.sendStatus(STATUS.serverError)
+  }
+
+  //sending an ok response upon successful update
+  res.status(STATUS.ok).json({ msg: "Subtask updated successfully" })
 }
