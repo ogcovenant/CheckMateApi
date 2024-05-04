@@ -1,8 +1,8 @@
 import express from "express"
 import { createTask } from "../controllers/tasks/taskControllers.js"
-import { getTodayTask } from "../controllers/tasks/getTasks.js"
-import { getTomorrowTask } from "../controllers/tasks/getTasks.js"
-import { getThisWeekTask } from "../controllers/tasks/getTasks.js"
+import { getTodayTask } from "../controllers/tasks/taskControllers.js"
+import { getTomorrowTask } from "../controllers/tasks/taskControllers.js"
+import { getThisWeekTask } from "../controllers/tasks/taskControllers.js"
 
 export const router = express.Router()
 

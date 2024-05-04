@@ -1,9 +1,11 @@
 //app imports
 import express from "express"
 import dotenv from "dotenv"
-import cookieParser from "cookie-parser";
+import cookieParser from "cookie-parser"
+import cors from "cors"
 
-
+//cors whitelist import
+import corsWhitelist from "./config/corsWhitelist.js"
 
 //verify JWT middleware import
 import verifyUser from "./middlewares/verifyUser.js";
@@ -12,6 +14,15 @@ import verifyUser from "./middlewares/verifyUser.js";
 dotenv.config()
 const app = express();
 const PORT = process.env.PORT;
+app.use(cors({
+  origin: ( origin, cb ) => {
+    if (!corsWhitelist.includes(origin) || !origin) {
+      cb(null, true)
+    } else {
+      cb(new Error('Not allowed by CORS'))
+    }
+  }
+}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())

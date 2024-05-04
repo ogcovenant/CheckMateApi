@@ -3,6 +3,7 @@ import db from "../../config/dbconfig.js";
 import STATUS from "../../config/statusConfig.js"
 import Joi from "joi";
 import { nanoid } from "nanoid";
+import { getWeekAndDays } from "../../utils/getWeekAndDays.js";
 
 //schema for validation 
 const taskSchema = Joi.object({
@@ -73,5 +74,79 @@ export const createTask = async(req, res) => {
 
   //returning an ok response upon successful creation of task
   res.status(STATUS.ok).json({ msg: "Task Created Successfully" })
+
+}
+
+
+
+//a controller function to get the task for today
+export const getTodayTask = async(req, res) => {
+  
+  //getting the current user and current date
+  const user = req.user;
+  const date = new Date().toLocaleDateString()
+
+  //querying the database to get the tasks and associated subtasks
+  try{  
+
+    const taskData = [
+      user.id,
+      date
+    ]
+    //query to get the tasks
+    const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date = ?;", taskData);
+    
+    //checking if the task list is not empty
+    //sending a not found error if the task list is empty
+    if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
+
+    //sending a success message and the tasks if the task was retrieved successfully
+    res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
+
+  }catch(err){
+    //sending a server error status if any error occurs during the operation
+    return res.sendStatus(STATUS.serverError);
+  }
+
+}
+
+export const getTomorrowTask = async(req, res) => {
+
+  const user = req.user;
+  const date = new Date();
+  date.setDate(date.getDate() + 1);
+
+  const tomorrowDate = date.toLocaleDateString()
+
+  try{  
+
+    const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date = ?;", [ user.id, tomorrowDate ]);
+    if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
+
+    res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
+
+  }catch(err){
+    console.log(err)
+    return res.sendStatus(STATUS.serverError);
+  }
+  
+}
+
+export const getThisWeekTask = async(req, res) => {
+
+  const user = req.user;
+  const date = new Date();  
+
+  const weekDays = getWeekAndDays(date);
+
+  try{  
+    const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date IN (?);", [ user.id, weekDays ]);
+    if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
+
+    res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
+  }catch(err){
+    console.log(err)
+    return res.sendStatus(STATUS.serverError);
+  }
 
 }
