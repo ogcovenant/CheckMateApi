@@ -133,3 +133,63 @@ export const loginUser = async(req, res) => {
       return res.sendStatus(STATUS.serverError)
     }
 }
+
+
+
+
+//a controller to handle forgotten password request
+export const forgottenPassword = async(req, res) => {
+  //validating the request body using express validator 
+  const errors = validationResult(req);
+
+  //sending an error if the values provided were invalid
+  if(!errors.isEmpty()){
+    return res.status(STATUS.notAcceptable).json({ msg: "Invalid email provided" });
+  }
+
+  const email = req.body.email;
+
+  //searching the database to see if the user with the above email exists
+  try{
+    //query to search the database
+    const existingUser = await db.user.findUnique({
+      where:{
+        email: email
+      }
+    })
+
+    //sending a 404 status if the user was not found
+    if(!existingUser) return res.status(STATUS.notFound).json({ error: "You are not signed up yet" });
+
+    const resetPassId = nanoid();
+    
+    //usePlunk email configuration for email sending
+    const options = {
+      method: 'POST',
+      headers: JSON.stringify({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.PLUNK_API_KEY}`
+      }),
+      body: JSON.stringify({
+        "to":[email],
+        "subject":"Reset Password",
+        "body":"<string>",
+        "name":"CheckMate",
+        "from":"justcovenant@gmail.com"
+      })
+    };
+    
+    fetch('https://api.useplunk.com/v1/send', options)
+      .then(response => response.json())
+      .then(response => console.log(response))
+      .catch(err => console.error(err));
+
+    //sending the success message along with the access token
+    res.status(STATUS.ok).json({ msg: "Reset code sent" });
+
+
+  }catch(err){
+    //sending a server error status if any error occurs in the above operation
+    return res.sendStatus(STATUS.serverError)
+  }
+}
