@@ -5,10 +5,10 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 
 //cors whitelist import
-import corsWhitelist from "./config/corsWhitelist.js"
+import corsWhitelist from "./config/corsWhitelist"
 
 //verify JWT middleware import
-import verifyUser from "./middlewares/verifyUser.js";
+import verifyUser from "./middlewares/verifyUser";
 
 //app configurations
 dotenv.config()
@@ -29,10 +29,10 @@ app.use(cookieParser())
 
 
 //route imports
-import { router as authRoute } from "./routes/authRoute.js";
-import { router as taskRoute } from "./routes/taskRoute.js"
-import { router as listRoute } from "./routes/listRoute.js";
-import { router as subtaskRoute } from "./routes/subtaskRoute.js"
+import { router as authRoute } from "./routes/authRoute";
+import { router as taskRoute } from "./routes/taskRoute"
+import { router as listRoute } from "./routes/listRoute";
+import { router as subtaskRoute } from "./routes/subtaskRoute"
 
 
 //route usage

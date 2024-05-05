@@ -1,5 +1,5 @@
-export const getWeekAndDays = (date) => {
-  const weekDays = [];
+export const getWeekAndDays = (date: Date) => {
+  const weekDays:Array<string> = [];
 
   const sunday = new Date(date.getTime());
   sunday.setDate(date.getDate() - date.getDay());

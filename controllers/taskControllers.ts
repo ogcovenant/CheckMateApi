@@ -1,9 +1,9 @@
 //route imports
-import db from "../../config/dbconfig.js";
-import STATUS from "../../config/statusConfig.js"
+import db from "../config/dbconfig";
+import STATUS from "../config/statusConfig"
 import Joi from "joi";
 import { nanoid } from "nanoid";
-import { getWeekAndDays } from "../../utils/getWeekAndDays.js";
+import { getWeekAndDays } from "../utils/getWeekAndDays";
 
 //schema for validation 
 const taskSchema = Joi.object({
@@ -42,8 +42,8 @@ export const createTask = async(req, res) => {
   if(task.list_id !== ""){
     try{
     
-      const [list] = await db.query("SELECT * FROM lists WHERE id = ?", [ task.list_id ]);
-      if(!list[0]) return res.status(STATUS.notFound).json({ error: "Selected List Does Not Exist" });
+      // const [list] = await db.query("SELECT * FROM lists WHERE id = ?", [ task.list_id ]);
+      // if(!list[0]) return res.status(STATUS.notFound).json({ error: "Selected List Does Not Exist" });
   
     }catch(err){
       return res.sendStatus(STATUS.serverError);
@@ -65,7 +65,7 @@ export const createTask = async(req, res) => {
     ]
 
     //query to insert the data into the database
-    await db.query("INSERT INTO tasks ( id, title, due_date, no_of_subtasks, list_id, user_id, status )  VALUES ( ?, ?, ?, ?, ?, ?, ? )", taskData)
+    // await db.query("INSERT INTO tasks ( id, title, due_date, no_of_subtasks, list_id, user_id, status )  VALUES ( ?, ?, ?, ?, ?, ?, ? )", taskData)
   }catch(err){
     console.log(err)
     //returning a server error status if an issue occurs with the operation
@@ -94,14 +94,14 @@ export const getTodayTask = async(req, res) => {
       date
     ]
     //query to get the tasks
-    const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date = ?;", taskData);
+    // const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date = ?;", taskData);
     
     //checking if the task list is not empty
     //sending a not found error if the task list is empty
-    if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
+    // if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
 
     //sending a success message and the tasks if the task was retrieved successfully
-    res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
+    // res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
 
   }catch(err){
     //sending a server error status if any error occurs during the operation
@@ -120,10 +120,10 @@ export const getTomorrowTask = async(req, res) => {
 
   try{  
 
-    const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date = ?;", [ user.id, tomorrowDate ]);
-    if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
+    // const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date = ?;", [ user.id, tomorrowDate ]);
+    // if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
 
-    res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
+    // res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
 
   }catch(err){
     console.log(err)
@@ -140,10 +140,10 @@ export const getThisWeekTask = async(req, res) => {
   const weekDays = getWeekAndDays(date);
 
   try{  
-    const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date IN (?);", [ user.id, weekDays ]);
-    if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
+    // const [ tasks ] = await db.query("SELECT tasks.*, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', subtasks.id,'title', subtasks.title,'status', subtasks.status)) FROM subtasks WHERE subtasks.task_id = tasks.id ) AS subtasks FROM tasks WHERE user_id = ? AND due_date IN (?);", [ user.id, weekDays ]);
+    // if(!tasks[0]) return res.status(STATUS.notFound).json({ error: "Task List Is Empty" });
 
-    res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
+    // res.status(STATUS.ok).json({ msg: "Tasks Retrieved Successfully", tasks: tasks })
   }catch(err){
     console.log(err)
     return res.sendStatus(STATUS.serverError);

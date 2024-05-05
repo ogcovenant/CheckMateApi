@@ -1,7 +1,7 @@
 //route imports
 import bcrypt from "bcryptjs"
-import STATUS from "../../config/statusConfig.js"
-import db from "../../config/dbconfig.js"
+import STATUS from "../config/statusConfig"
+import db from "../config/dbconfig"
 import { nanoid } from "nanoid";
 import jwt from 'jsonwebtoken';
 import { validationResult } from "express-validator";
@@ -25,16 +25,18 @@ export const createUser = async ( req, res ) => {
 
   //checking if a user is already present with the email
   try{
-    //storing the email in an array for security purposes
-    const existingEmail = [ email ]
-
     //query to get the existing user
-    const [existingUser] = await db.query("SELECT * FROM users WHERE email = ?", existingEmail);
+    const existingUser = await db.user.findUnique({
+      where: {
+        email: email
+      }
+    });
 
     //returning a confilict status if there is a user existing with the email
-    if(existingUser[0]) return res.status(STATUS.conflict).json({ error: "User with email already exists" });
+    if(existingUser) return res.status(STATUS.conflict).json({ error: "User with email already exists" });
 
   }catch(err){
+    console.log(err)
     //returning an error if there is any error with the operation
     return res.sendStatus(STATUS.serverError);
   }
@@ -52,16 +54,22 @@ export const createUser = async ( req, res ) => {
   const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "7d" })
 
   //an array to store the data been saved into the database
-  const userData = [
-    id,
-    email,
-    hashedPassword
-  ]
+  const userData = {
+    id: id,
+    email: email,
+    password: hashedPassword
+  }
 
   //inserting the user into the database
   try{  
     //query to insert the user into the database
-    await db.query("INSERT INTO users ( id, email, password ) VALUES ( ?, ?, ? )", userData);
+    await db.user.create({
+      data:{
+        id: userData.id,
+        email: userData.email,
+        password: userData.password
+      }
+    })
   }catch(err){
     //returning an error if there is any issue with the operation
     return res.sendStatus(STATUS.serverError);
@@ -91,29 +99,26 @@ export const loginUser = async(req, res) => {
 
     //searching the database to see if the user with the above email exists
     try{
-
-      //creating an array to store the email for security pupose
-      const userEmail = [ email ]
-
       //query to search the database
-      const [existingUser] = await db.query("SELECT * FROM users WHERE email = ?", userEmail);
+      const existingUser = await db.user.findUnique({
+        where:{
+          email: email
+        }
+      })
 
       //sending a 404 status if the user was not found
-      if(!existingUser[0]) return res.status(STATUS.notFound).json({ error: "You are not signed up yet" });
-
-      //setting storing the user if found
-      const user = existingUser[0];
+      if(!existingUser) return res.status(STATUS.notFound).json({ error: "You are not signed up yet" });
 
       //matching the password to see if the passwords match
-      const match = await bcrypt.compare(password, user.password);
+      const match = await bcrypt.compare(password, existingUser.password);
 
       //sending a not authorized status if the passwords do not match
       if(!match) return res.status(STATUS.unauthorized).json({ error: "Invalid Password" })
 
       //storind the data required for jwt creation in an object
       const userData = {
-        id: user.id,
-        email: user.email
+        id: existingUser.id,
+        email: existingUser.email
       }
 
       //generating an access token

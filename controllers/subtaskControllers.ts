@@ -1,6 +1,6 @@
 //route imports
-import db from "../../config/dbconfig.js";
-import STATUS from "../../config/statusConfig.js"
+import db from "../config/dbconfig";
+import STATUS from "../config/statusConfig"
 import Joi from "joi";
 import { nanoid } from "nanoid";
 
@@ -46,14 +46,14 @@ export const createSubtaskTask = async (req, res) => {
     const subtaskTaskID = [ subtask.task_id ]
 
     //query to get the task matching the task_id in the database
-    const [task] = await db.query("SELECT * FROM tasks WHERE id = ?", subtaskTaskID);
+    // const [task] = await db.query("SELECT * FROM tasks WHERE id = ?", subtaskTaskID);
 
     //returning a not found status if the task is not found in the database 
-    if(!task[0]) return res.status(STATUS.notFound).json({ error: "Selected Task Does Not Exist" });
+    // if(!task[0]) return res.status(STATUS.notFound).json({ error: "Selected Task Does Not Exist" });
 
     //updating the temporary storage to store the id and no of subtasks of the task after its verification 
-    no_of_subtasks = task[0].no_of_subtasks;
-    id = task[0].id
+    // no_of_subtasks = task[0].no_of_subtasks;
+    // id = task[0].id
 
   }catch(err){
     //returning a server error status if any error occures during the database operation
@@ -71,7 +71,7 @@ export const createSubtaskTask = async (req, res) => {
     ]
 
     //query to insert the subtask into the database
-    await db.query("INSERT INTO subtasks ( id, title, task_id, status )  VALUES ( ?, ?, ?, ? )", subtaskData)
+    // await db.query("INSERT INTO subtasks ( id, title, task_id, status )  VALUES ( ?, ?, ?, ? )", subtaskData)
 
     //creating an array to store the updated task parameter and id
     const taskData = [ 
@@ -80,7 +80,7 @@ export const createSubtaskTask = async (req, res) => {
     ]
 
     //query to update the task parameters in the database
-    await db.query("UPDATE tasks SET no_of_subtasks = ? WHERE id = ?", taskData)
+    // await db.query("UPDATE tasks SET no_of_subtasks = ? WHERE id = ?", taskData)
   }catch(err){
     //returning a server error status if an error occurs
     return res.sendStatus(STATUS.serverError);
@@ -107,29 +107,29 @@ export const deleteSubtask = async( req, res ) => {
   //deleting the subtask and updating the no_of_subtasks from the related task
   try {
     //search for selected subtask to see if it exists
-    const [ subtask ] = await db.query("SELECT * FROM subtasks WHERE id = ?", subtask_id);
+    // const [ subtask ] = await db.query("SELECT * FROM subtasks WHERE id = ?", subtask_id);
 
     //if the specified subtask does not exist return a not found error
-    if(!subtask[0]) return res.status(STATUS.notFound).json({ error: "Could not find specified subtask" });
+    // if(!subtask[0]) return res.status(STATUS.notFound).json({ error: "Could not find specified subtask" });
 
     //assign the task_id from the subtask to the temporary storage
-    task_id = [ subtask[0].task_id ];
+    // task_id = [ subtask[0].task_id ];
 
     //search the database for the parent task of the subtask
     try {
       //query to get the parent task
-      const [ task ] = await db.query("SELECT * FROM tasks WHERE id = ?", task_id)
+      // const [ task ] = await db.query("SELECT * FROM tasks WHERE id = ?", task_id)
 
       //check if the parent task exists
-      if(!task[0]) return res.status(STATUS.notFound).json({ error: "Could not find the parent task of the specified subtask" });
+      // if(!task[0]) return res.status(STATUS.notFound).json({ error: "Could not find the parent task of the specified subtask" });
 
       //assign the no_of_subtasks to the temporary storage 
-      no_of_subtasks = task[0].no_of_subtasks;
+      // no_of_subtasks = task[0].no_of_subtasks;
 
       //delete the subtask and update the parent task no_of_subtasks
       try {
         //query to delete the subtask
-        await db.query("DELETE FROM subtasks WHERE id = ?", subtask_id);
+        // await db.query("DELETE FROM subtasks WHERE id = ?", subtask_id);
 
         //create an array to store the params to update
         const taskData = [
@@ -138,7 +138,7 @@ export const deleteSubtask = async( req, res ) => {
         ]
 
         //query to update tasks
-        await db.query("UPDATE tasks SET no_of_subtasks = ? WHERE id = ?", taskData)
+        // await db.query("UPDATE tasks SET no_of_subtasks = ? WHERE id = ?", taskData)
 
       } catch (err) {
         //returning a server error status if any error occurs in the operation
@@ -179,14 +179,14 @@ export const updateSubtask = async(req, res) => {
   //check if the list to be updated exists and update it if it exists
   try{
     //query to select the specified subtask
-    const [ existingSubtask ] = await db.query("SELECT * FROM subtasks WHERE id = ?", [ subtaskID ])
+    // const [ existingSubtask ] = await db.query("SELECT * FROM subtasks WHERE id = ?", [ subtaskID ])
 
     //sends a not found status if the task is not found
-    if(!existingSubtask[0]) return res.status(STATUS.notFound).json({ error: "Could not find the specified subtask to be updated" });
+    // if(!existingSubtask[0]) return res.status(STATUS.notFound).json({ error: "Could not find the specified subtask to be updated" });
 
     //check if the a title or color is present in the request body and assign a default value if one is not specified
-    if(titleRaw.error) subtask.title = existingSubtask[0].title
-    if(statusRaw.error) subtask.status = existingSubtask[0].status
+    // if(titleRaw.error) subtask.title = existingSubtask[0].title
+    // if(statusRaw.error) subtask.status = existingSubtask[0].status
 
     //update the subtasks
     try {
@@ -199,7 +199,7 @@ export const updateSubtask = async(req, res) => {
       ]
 
       //query to update the subtask
-      await db.query("UPDATE subtasks SET title = ?, status = ? WHERE id = ?", subtaskData)
+      // await db.query("UPDATE subtasks SET title = ?, status = ? WHERE id = ?", subtaskData)
 
     } catch (err) {
       //returning a server error if there's any issue with the operation
