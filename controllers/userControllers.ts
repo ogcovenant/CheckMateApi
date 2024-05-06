@@ -5,6 +5,7 @@ import db from "../config/dbconfig"
 import { nanoid } from "nanoid";
 import jwt from 'jsonwebtoken';
 import { validationResult } from "express-validator";
+import nodemailer from "nodemailer"
 
 
 
@@ -64,11 +65,7 @@ export const createUser = async ( req, res ) => {
   try{  
     //query to insert the user into the database
     await db.user.create({
-      data:{
-        id: userData.id,
-        email: userData.email,
-        password: userData.password
-      }
+      data: userData
     })
   }catch(err){
     //returning an error if there is any issue with the operation
@@ -161,28 +158,58 @@ export const forgottenPassword = async(req, res) => {
     //sending a 404 status if the user was not found
     if(!existingUser) return res.status(STATUS.notFound).json({ error: "You are not signed up yet" });
 
-    const resetPassId = nanoid();
+
+    //constructing the expiry date
+    const date = new Date();
+    date.setHours(date.getHours() + 2);
+
+    //create a reset for the current reset 
+    const reset = {
+      id: nanoid(),
+      expiresIn: date,
+      userId: existingUser.id
+    }
+
+    //pushing the reset date to the database
+    await db.resetPasswordTable.create({
+      data: reset
+    })
     
-    //usePlunk email configuration for email sending
-    const options = {
-      method: 'POST',
-      headers: JSON.stringify({
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.PLUNK_API_KEY}`
-      }),
-      body: JSON.stringify({
-        "to":[email],
-        "subject":"Reset Password",
-        "body":"<string>",
-        "name":"CheckMate",
-        "from":"justcovenant@gmail.com"
-      })
-    };
-    
-    fetch('https://api.useplunk.com/v1/send', options)
-      .then(response => response.json())
-      .then(response => console.log(response))
-      .catch(err => console.error(err));
+    //getting the resetID
+    const resetId = await db.resetPasswordTable.findFirst({
+      where:{
+        userId: existingUser.id
+      }
+    })
+
+   const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "justcovenant@gmail.com",
+      pass: "escz neom labs ronu"
+    },
+   })
+
+   try {
+    const info = await transporter.sendMail({
+      from: '"CheckMate" <justcovenant@gmail.com>', // sender address
+      to: email, // list of receivers
+      subject: "Reset Password", // Subject line
+      html: `<div style="display: flex; flex-direction: column; align-items: center; margin-top: 20px; font-family: Arial"><div style="max-width: 600px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 10px;"><h2 style="color: #333; font-weight: bold; margin-bottom: 20px;">Reset your password</h2><p>Dear User,</p><p style="font-size: 16px; margin-bottom: 30px;">We received a request to reset your password. Click the link below to create a new password and regain access to your account.</p><a href="https://checkmate-x.vercel.app/reset-password/${resetId?.id}" style="background-color: #ffcc24; color: #000; font-style: bold; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none;">Verify Email Address</a><div style="margin-top: 20px">Please note that this link is only valid for 2 hours. If you did not request a password reset, please ignore this email.</div><div><p>Best regards,<br />CheckMate</></div></div></div>`, // html body
+      // Add these settings to help prevent spam flags
+      sender: '"CheckMate" <justcovenant@gmail.com>', // sender address
+      replyTo: '"CheckMate" <justcovenant@gmail.com>', // reply address
+      priority: 'high', // email priority
+      headers: {
+        'Precedence': 'bulk', // email precedence
+        'X-Priority': '3', // email priority (3 is high)
+      },
+    });
+   } catch (error) {
+    return res.sendStatus(STATUS.serverError);
+   }
 
     //sending the success message along with the access token
     res.status(STATUS.ok).json({ msg: "Reset code sent" });
