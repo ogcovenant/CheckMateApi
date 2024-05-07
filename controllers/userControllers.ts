@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 import jwt from 'jsonwebtoken';
 import { validationResult } from "express-validator";
 import nodemailer from "nodemailer"
+import moment from "moment"
 
 
 
@@ -126,6 +127,7 @@ export const loginUser = async(req, res) => {
 
 
     }catch(err){
+      console.log(err)
       //sending a server error status if any error occurs in the above operation
       return res.sendStatus(STATUS.serverError)
     }
@@ -161,12 +163,13 @@ export const forgottenPassword = async(req, res) => {
 
     //constructing the expiry date
     const date = new Date();
-    date.setHours(date.getHours() + 2);
+    const expiry = moment(moment(date).add(3, "hours"))
+    const expiryDate = expiry.toDate()
 
     //create a reset for the current reset 
     const reset = {
       id: nanoid(),
-      expiresIn: date,
+      expiresIn: expiryDate,
       userId: existingUser.id
     }
 
@@ -193,7 +196,7 @@ export const forgottenPassword = async(req, res) => {
    })
 
    try {
-    const info = await transporter.sendMail({
+    await transporter.sendMail({
       from: '"CheckMate" <justcovenant@gmail.com>', // sender address
       to: email, // list of receivers
       subject: "Reset Password", // Subject line
@@ -219,4 +222,54 @@ export const forgottenPassword = async(req, res) => {
     //sending a server error status if any error occurs in the above operation
     return res.sendStatus(STATUS.serverError)
   }
+}
+
+
+
+//a controller to reset the user's password
+export const resetPassword = async( req, res ) => {
+    
+  //validating the request body using express validator 
+  const errors = validationResult(req);
+
+  //sending an error if the values provided were invalid
+  if(!errors.isEmpty()){
+    return res.status(STATUS.notAcceptable).json({ msg: "Invalid values provided" });
+  }
+
+  //getting the new password
+  const resetID = req.body.id
+  const password = req.body.password
+
+  //checking the database to see if the resetID is valid
+  try{
+    const resetData = await db.resetPasswordTable.findUnique({
+      where: {
+        id: resetID
+      }
+    })
+
+    //if the resetID is not valid or expired, then we send an error
+    if(!resetData || resetData.expiresIn < new Date()){
+      return res.status(STATUS.unauthorized).json({ msg: "Invalid reset code" });
+    }
+
+    //updating the user's password
+    await db.user.update({
+      where: {
+        id: resetData.userId
+      },
+      data: {
+        password: await bcrypt.hash(password, 12)
+      }
+    })
+
+    res.status(STATUS.ok).json({ msg: "Password changed successfully" })
+
+
+  }catch(err){
+    //returning a server error status if any issue occurs with the operation
+    res.sendStatus(STATUS.serverError)
+  }
+
 }

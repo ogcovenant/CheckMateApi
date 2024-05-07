@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.forgottenPassword = exports.loginUser = exports.createUser = void 0;
+exports.resetPassword = exports.forgottenPassword = exports.loginUser = exports.createUser = void 0;
 //route imports
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const statusConfig_1 = __importDefault(require("../config/statusConfig"));
@@ -21,6 +21,7 @@ const nanoid_1 = require("nanoid");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const express_validator_1 = require("express-validator");
 const nodemailer_1 = __importDefault(require("nodemailer"));
+const moment_1 = __importDefault(require("moment"));
 //a controller function to create user
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //validating the request body using express validator 
@@ -118,6 +119,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(statusConfig_1.default.ok).json({ msg: "Login Successful", accessToken: accessToken });
     }
     catch (err) {
+        console.log(err);
         //sending a server error status if any error occurs in the above operation
         return res.sendStatus(statusConfig_1.default.serverError);
     }
@@ -145,11 +147,12 @@ const forgottenPassword = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return res.status(statusConfig_1.default.notFound).json({ error: "You are not signed up yet" });
         //constructing the expiry date
         const date = new Date();
-        date.setHours(date.getHours() + 2);
+        const expiry = (0, moment_1.default)((0, moment_1.default)(date).add(3, "hours"));
+        const expiryDate = expiry.toDate();
         //create a reset for the current reset 
         const reset = {
             id: (0, nanoid_1.nanoid)(),
-            expiresIn: date,
+            expiresIn: expiryDate,
             userId: existingUser.id
         };
         //pushing the reset date to the database
@@ -172,7 +175,7 @@ const forgottenPassword = (req, res) => __awaiter(void 0, void 0, void 0, functi
             },
         });
         try {
-            const info = yield transporter.sendMail({
+            yield transporter.sendMail({
                 from: '"CheckMate" <justcovenant@gmail.com>', // sender address
                 to: email, // list of receivers
                 subject: "Reset Password", // Subject line
@@ -199,3 +202,42 @@ const forgottenPassword = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.forgottenPassword = forgottenPassword;
+//a controller to reset the user's password
+const resetPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //validating the request body using express validator 
+    const errors = (0, express_validator_1.validationResult)(req);
+    //sending an error if the values provided were invalid
+    if (!errors.isEmpty()) {
+        return res.status(statusConfig_1.default.notAcceptable).json({ msg: "Invalid values provided" });
+    }
+    //getting the new password
+    const resetID = req.body.id;
+    const password = req.body.password;
+    //checking the database to see if the resetID is valid
+    try {
+        const resetData = yield dbconfig_1.default.resetPasswordTable.findUnique({
+            where: {
+                id: resetID
+            }
+        });
+        //if the resetID is not valid or expired, then we send an error
+        if (!resetData || resetData.expiresIn < new Date()) {
+            return res.status(statusConfig_1.default.unauthorized).json({ msg: "Invalid reset code" });
+        }
+        //updating the user's password
+        yield dbconfig_1.default.user.update({
+            where: {
+                id: resetData.userId
+            },
+            data: {
+                password: yield bcryptjs_1.default.hash(password, 12)
+            }
+        });
+        res.status(statusConfig_1.default.ok).json({ msg: "Password changed successfully" });
+    }
+    catch (err) {
+        //returning a server error status if any issue occurs with the operation
+        res.sendStatus(statusConfig_1.default.serverError);
+    }
+});
+exports.resetPassword = resetPassword;
