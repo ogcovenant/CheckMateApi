@@ -211,6 +211,7 @@ export const forgottenPassword = async(req, res) => {
       },
     });
    } catch (error) {
+    console.log(error)
     return res.sendStatus(STATUS.serverError);
    }
 
