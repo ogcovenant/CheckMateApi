@@ -149,20 +149,18 @@ const forgottenPassword = (req, res) => __awaiter(void 0, void 0, void 0, functi
         const date = new Date();
         const expiry = (0, moment_1.default)((0, moment_1.default)(date).add(3, "hours"));
         const expiryDate = expiry.toDate();
-        //create a reset for the current reset 
-        const reset = {
-            id: (0, nanoid_1.nanoid)(),
-            expiresIn: expiryDate,
-            userId: existingUser.id
-        };
         //pushing the reset date to the database
         yield dbconfig_1.default.resetPasswordTable.create({
-            data: reset
+            data: {
+                id: (0, nanoid_1.nanoid)(),
+                expiresIn: expiryDate,
+                userId: existingUser.id
+            }
         });
         //getting the resetID
         const resetId = yield dbconfig_1.default.resetPasswordTable.findUnique({
             where: {
-                userId: reset.userId
+                userId: existingUser.id
             }
         });
         const transporter = nodemailer_1.default.createTransport({

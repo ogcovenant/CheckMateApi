@@ -166,22 +166,20 @@ export const forgottenPassword = async(req, res) => {
     const expiry = moment(moment(date).add(3, "hours"))
     const expiryDate = expiry.toDate()
 
-    //create a reset for the current reset 
-    const reset = {
-      id: nanoid(),
-      expiresIn: expiryDate,
-      userId: existingUser.id
-    }
 
     //pushing the reset date to the database
     await db.resetPasswordTable.create({
-      data: reset
+      data: {
+        id: nanoid(),
+        expiresIn: expiryDate,
+        userId: existingUser.id
+      }
     })
     
     //getting the resetID
     const resetId = await db.resetPasswordTable.findUnique({
       where:{
-        userId: reset.userId
+        userId: existingUser.id
       }
     })
 
