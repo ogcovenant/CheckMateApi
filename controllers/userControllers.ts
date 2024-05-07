@@ -179,9 +179,9 @@ export const forgottenPassword = async(req, res) => {
     })
     
     //getting the resetID
-    const resetId = await db.resetPasswordTable.findFirst({
+    const resetId = await db.resetPasswordTable.findUnique({
       where:{
-        userId: existingUser.id
+        userId: reset.userId
       }
     })
 
@@ -261,6 +261,13 @@ export const resetPassword = async( req, res ) => {
       },
       data: {
         password: await bcrypt.hash(password, 12)
+      }
+    })
+
+    //deleting the reset data from the database
+    await db.resetPasswordTable.delete({
+      where: {
+        id: resetID
       }
     })
 
