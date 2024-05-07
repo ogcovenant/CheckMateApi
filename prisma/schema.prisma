@@ -21,7 +21,7 @@ model User {
   tasks       Task[]
   List        List[]               @relation("list")
   sharedList  List[]               @relation("collab")
-  resetPassId ResetPasswordTable?
+  resetPassId ResetPasswordTable[]
 }
 
 model Task {
@@ -72,5 +72,5 @@ model ResetPasswordTable {
   id        String   @id @default(uuid())
   expiresIn DateTime
   user      User     @relation(fields: [userId], references: [id])
-  userId    String   @unique
+  userId    String   
 }

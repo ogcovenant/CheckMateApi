@@ -158,7 +158,7 @@ const forgottenPassword = (req, res) => __awaiter(void 0, void 0, void 0, functi
             }
         });
         //getting the resetID
-        const resetId = yield dbconfig_1.default.resetPasswordTable.findUnique({
+        const resetId = yield dbconfig_1.default.resetPasswordTable.findFirst({
             where: {
                 userId: existingUser.id
             }

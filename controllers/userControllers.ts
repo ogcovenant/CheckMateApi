@@ -177,7 +177,7 @@ export const forgottenPassword = async(req, res) => {
     })
     
     //getting the resetID
-    const resetId = await db.resetPasswordTable.findUnique({
+    const resetId = await db.resetPasswordTable.findFirst({
       where:{
         userId: existingUser.id
       }
