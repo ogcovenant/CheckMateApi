@@ -21,7 +21,7 @@ model User {
   tasks       Task[]
   List        List[]               @relation("list")
   sharedList  List[]               @relation("collab")
-  resetPassId ResetPasswordTable[]
+  resetPassId ResetPasswordTable?
 }
 
 model Task {
