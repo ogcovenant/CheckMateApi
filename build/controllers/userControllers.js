@@ -160,9 +160,9 @@ const forgottenPassword = (req, res) => __awaiter(void 0, void 0, void 0, functi
             data: reset
         });
         //getting the resetID
-        const resetId = yield dbconfig_1.default.resetPasswordTable.findFirst({
+        const resetId = yield dbconfig_1.default.resetPasswordTable.findUnique({
             where: {
-                userId: existingUser.id
+                userId: reset.userId
             }
         });
         const transporter = nodemailer_1.default.createTransport({
@@ -191,12 +191,14 @@ const forgottenPassword = (req, res) => __awaiter(void 0, void 0, void 0, functi
             });
         }
         catch (error) {
+            console.log(error);
             return res.sendStatus(statusConfig_1.default.serverError);
         }
         //sending the success message along with the access token
         res.status(statusConfig_1.default.ok).json({ msg: "Reset code sent" });
     }
     catch (err) {
+        console.log(err);
         //sending a server error status if any error occurs in the above operation
         return res.sendStatus(statusConfig_1.default.serverError);
     }
@@ -231,6 +233,12 @@ const resetPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             },
             data: {
                 password: yield bcryptjs_1.default.hash(password, 12)
+            }
+        });
+        //deleting the reset data from the database
+        yield dbconfig_1.default.resetPasswordTable.delete({
+            where: {
+                id: resetID
             }
         });
         res.status(statusConfig_1.default.ok).json({ msg: "Password changed successfully" });
