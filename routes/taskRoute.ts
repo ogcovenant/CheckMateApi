@@ -1,21 +1,23 @@
 import express from "express"
 import { createTask } from "../controllers/taskControllers"
-import { getTodayTask } from "../controllers/taskControllers"
-import { getTomorrowTask } from "../controllers/taskControllers"
-import { getThisWeekTask } from "../controllers/taskControllers"
+import { getTasks } from "../controllers/taskControllers";
+import { body } from "express-validator";
 
 export const router = express.Router()
 
-router.route("/add")
+router.route("/add", [
+  [
+    body("title").trim().notEmpty(),
+    body("dueDate").trim().notEmpty(),
+    body("priority").trim().notEmpty(),
+    body("tags").isArray(),
+    body("category").trim().notEmpty()
+  ],
+])
   .post(createTask)
 
-router.route("/today")
-  .get(getTodayTask)
+router.route("/")
+  .get(getTasks)
 
-router.route("/tomorrow")
-  .get(getTomorrowTask)
-
-router.route("/thisweek")
-  .get(getThisWeekTask)
 
 export default router

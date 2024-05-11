@@ -31,8 +31,6 @@ app.use(cookieParser())
 //route imports
 import { router as authRoute } from "./routes/authRoute";
 import { router as taskRoute } from "./routes/taskRoute"
-import { router as listRoute } from "./routes/listRoute";
-import { router as subtaskRoute } from "./routes/subtaskRoute"
 
 
 //route usage
@@ -41,9 +39,6 @@ app.use(authRoute)
 //routes that uses the verifyUser middleware
 app.use(verifyUser);
 app.use("/tasks",taskRoute)
-app.use("/lists", listRoute)
-app.use("/subtasks", subtaskRoute)
-
 
 //the welcome greeting at the root endpoint of the api
 app.get("/", (req, res) => {

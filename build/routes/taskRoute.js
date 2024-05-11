@@ -7,15 +7,18 @@ exports.router = void 0;
 const express_1 = __importDefault(require("express"));
 const taskControllers_1 = require("../controllers/taskControllers");
 const taskControllers_2 = require("../controllers/taskControllers");
-const taskControllers_3 = require("../controllers/taskControllers");
-const taskControllers_4 = require("../controllers/taskControllers");
+const express_validator_1 = require("express-validator");
 exports.router = express_1.default.Router();
-exports.router.route("/add")
+exports.router.route("/add", [
+    [
+        (0, express_validator_1.body)("title").trim().notEmpty(),
+        (0, express_validator_1.body)("dueDate").trim().notEmpty(),
+        (0, express_validator_1.body)("priority").trim().notEmpty(),
+        (0, express_validator_1.body)("tags").isArray(),
+        (0, express_validator_1.body)("category").trim().notEmpty()
+    ],
+])
     .post(taskControllers_1.createTask);
-exports.router.route("/today")
-    .get(taskControllers_2.getTodayTask);
-exports.router.route("/tomorrow")
-    .get(taskControllers_3.getTomorrowTask);
-exports.router.route("/thisweek")
-    .get(taskControllers_4.getThisWeekTask);
+exports.router.route("/")
+    .get(taskControllers_2.getTasks);
 exports.default = exports.router;

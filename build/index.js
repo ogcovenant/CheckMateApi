@@ -32,15 +32,11 @@ app.use((0, cookie_parser_1.default)());
 //route imports
 const authRoute_1 = require("./routes/authRoute");
 const taskRoute_1 = require("./routes/taskRoute");
-const listRoute_1 = require("./routes/listRoute");
-const subtaskRoute_1 = require("./routes/subtaskRoute");
 //route usage
 app.use(authRoute_1.router);
 //routes that uses the verifyUser middleware
 app.use(verifyUser_1.default);
 app.use("/tasks", taskRoute_1.router);
-app.use("/lists", listRoute_1.router);
-app.use("/subtasks", subtaskRoute_1.router);
 //the welcome greeting at the root endpoint of the api
 app.get("/", (req, res) => {
     res.status(200).send({ msg: "Welcome To CheckMate ✅" });

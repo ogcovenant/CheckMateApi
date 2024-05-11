@@ -17,13 +17,19 @@ export const createUser = async ( req, res ) => {
   const errors = validationResult(req);
 
   //sending an error if the values provided were invalid
-  if(!errors.isEmpty()){
+  if(errors){
     return res.status(STATUS.notAcceptable).json({ msg: "Invalid values provided" });
   }
+
 
   //getting the request body and storing them
   const email = req.body.email;
   const password = req.body.password;
+
+  //checking if the values provided are not empty
+  if(!email || !password){
+    return res.status(STATUS.notAcceptable).json({ msg: "Empty values provided" });
+  }
 
   //checking if a user is already present with the email
   try{
@@ -95,6 +101,11 @@ export const loginUser = async(req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
+    //checking if the values provided are empty
+    if(!email || !password){
+      return res.status(STATUS.notAcceptable).json({ msg: "Empty values provided" });
+    }
+
     //searching the database to see if the user with the above email exists
     try{
       //query to search the database
@@ -148,6 +159,12 @@ export const forgottenPassword = async(req, res) => {
 
   const email = req.body.email;
 
+      //checking if the values provided are empty
+      if(!email){
+        return res.status(STATUS.notAcceptable).json({ msg: "Empty values provided" });
+      }
+  
+
   //searching the database to see if the user with the above email exists
   try{
     //query to search the database
@@ -198,7 +215,7 @@ export const forgottenPassword = async(req, res) => {
       from: '"CheckMate" <justcovenant@gmail.com>', // sender address
       to: email, // list of receivers
       subject: "Reset Password", // Subject line
-      html: `<div style="display: flex; flex-direction: column; align-items: center; margin-top: 20px; font-family: Arial"><div style="max-width: 600px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 10px;"><h2 style="color: #333; font-weight: bold; margin-bottom: 20px;">Reset your password</h2><p>Dear User,</p><p style="font-size: 16px; margin-bottom: 30px;">We received a request to reset your password. Click the link below to create a new password and regain access to your account.</p><a href="https://checkmate-x.vercel.app/reset-password/${resetId?.id}" style="background-color: #ffcc24; color: #000; font-style: bold; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none;">Verify Email Address</a><div style="margin-top: 20px">Please note that this link is only valid for 2 hours. If you did not request a password reset, please ignore this email.</div><div><p>Best regards,<br />CheckMate</></div></div></div>`, // html body
+      html: `<div style="display: flex; flex-direction: column; align-items: center; margin-top: 20px; font-family: Arial"><div style="max-width: 600px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 10px;"><h2 style="color: #333; font-weight: bold; margin-bottom: 20px;">Reset your password</h2><p>Dear User,</p><p style="font-size: 16px; margin-bottom: 30px;">We received a request to reset your password. Click the link below to create a new password and regain access to your account.</p><a href="https://checkmate-x.vercel.app/reset-password/${resetId?.id}" style="background-color: #ffcc24; color: #000; font-style: bold; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none;">Reset Password</a><div style="margin-top: 20px">Please note that this link is only valid for 2 hours. If you did not request a password reset, please ignore this email.</div><div><p>Best regards,<br />CheckMate</></div></div></div>`, // html body
       // Add these settings to help prevent spam flags
       sender: '"CheckMate" <justcovenant@gmail.com>', // sender address
       replyTo: '"CheckMate" <justcovenant@gmail.com>', // reply address
@@ -240,6 +257,12 @@ export const resetPassword = async( req, res ) => {
   //getting the new password
   const resetID = req.body.id
   const password = req.body.password
+
+      //checking if the values provided are empty
+      if(!resetID || !password){
+        return res.status(STATUS.notAcceptable).json({ msg: "Empty values provided" });
+      }
+  
 
   //checking the database to see if the resetID is valid
   try{
