@@ -99,7 +99,6 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
     }
     catch (err) {
-        console.log(err);
         //returning a server error status if an issue occurs with the operation
         return res.sendStatus(statusConfig_1.default.serverError);
     }
@@ -108,5 +107,36 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.createTask = createTask;
 const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //getting the user making the request
+    const userId = req.user.id;
+    try {
+        //query to get the tasks from the backend
+        const tasks = yield dbconfig_1.default.task.findMany({
+            where: {
+                userId: userId
+            },
+            include: {
+                tags: {
+                    select: {
+                        id: true,
+                        title: true
+                    }
+                },
+                category: {
+                    select: {
+                        id: true,
+                        title: true
+                    }
+                }
+            }
+        });
+        if (!tasks)
+            return res.status(statusConfig_1.default.notFound).json({ error: "You don't have any task" });
+        res.status(statusConfig_1.default.ok).json({ msg: "Task Fetched Successfully", tasks: tasks });
+    }
+    catch (err) {
+        //returning a server error status if an issue occurs with the operation
+        return res.sendStatus(statusConfig_1.default.serverError);
+    }
 });
 exports.getTasks = getTasks;

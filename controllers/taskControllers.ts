@@ -95,7 +95,6 @@ export const createTask = async(req, res) => {
       }
     })
   }catch(err){
-    console.log(err)
     //returning a server error status if an issue occurs with the operation
     return res.sendStatus(STATUS.serverError);
   }
@@ -108,5 +107,39 @@ export const createTask = async(req, res) => {
 
 
 export const getTasks = async(req, res) => {
+
+  //getting the user making the request
+  const userId = req.user.id;
+
+  try{
+    //query to get the tasks from the backend
+    const tasks = await db.task.findMany({
+      where:{
+        userId: userId
+      },
+      include:{
+        tags: {
+          select:{
+            id: true,
+            title: true
+          }
+        },
+        category: {
+          select:{
+            id: true,
+            title: true
+          }
+        }
+      }
+    })
+
+    if( !tasks ) return res.status(STATUS.notFound).json({ error: "You don't have any task" })
+
+    res.status(STATUS.ok).json({ msg: "Task Fetched Successfully", tasks: tasks })
+
+  }catch(err){
+   //returning a server error status if an issue occurs with the operation
+   return res.sendStatus(STATUS.serverError);
+  }
 
 }
