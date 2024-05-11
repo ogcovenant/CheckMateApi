@@ -25,7 +25,6 @@ export const createTask = async (req, res) => {
     due_date: req.body.dueDate,
     priority: req.body.priority,
     tags: req.body.tags,
-    category: req.body.category,
     no_of_subtasks: 0,
     user_id: req.user.id,
     status: "pending",
@@ -37,8 +36,7 @@ export const createTask = async (req, res) => {
     !task.title ||
     !task.due_date ||
     !task.priority ||
-    !task.tags ||
-    !task.category
+    !task.tags
   ) {
     return res
       .status(STATUS.notAcceptable)
@@ -71,15 +69,6 @@ export const createTask = async (req, res) => {
           taskId: task.id,
         },
       });
-    });
-
-    //inserting category
-    await db.category.create({
-      data: {
-        id: nanoid(),
-        title: task.category,
-        taskId: task.id,
-      },
     });
 
   } catch (err) {
@@ -127,13 +116,7 @@ export const getTasks = async (req, res) => {
             id: true,
             title: true,
           },
-        },
-        category: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
+        }
       },
     });
 
@@ -173,7 +156,6 @@ export const editTask = async (req, res) => {
     due_date: req.body.dueDate,
     priority: req.body.priority,
     tags: req.body.tags,
-    category: req.body.category,
     status: req.body.status,
     note: req.body.note
   };
@@ -184,7 +166,6 @@ export const editTask = async (req, res) => {
     !task.due_date ||
     !task.priority ||
     !task.tags ||
-    !task.category ||
     !task.status ||
     !task.note
   ){
@@ -217,18 +198,7 @@ export const editTask = async (req, res) => {
       })
     });
 
-
-      await db.category.update({
-        where: {
-          id: task.category.id
-        },
-        data: {
-          title: task.category.title
-        }
-      })  
-
-
-    res.sendStatus(STATUS.noContent)
+    res.sendStatus(STATUS.ok).json({ msg: "Task updated successfully" })
 
   } catch (err) {
     console.log(err)
@@ -236,3 +206,29 @@ export const editTask = async (req, res) => {
     return res.sendStatus(STATUS.serverError)
   }
 };
+
+
+
+
+export const deleteTask = async(req, res) => {
+  const taskId = req.params.id;
+
+  try {
+    await db.task.delete({
+      where:{
+        id: taskId,
+      }
+    })
+
+    // await db.tag.deleteMany({
+    //   where:{
+    //     taskId: taskId
+    //   }
+    // })
+
+    res.status(STATUS.noContent).json({ msg: "Task Deleted Successfully" })
+
+  } catch (err) {
+    return res.sendStatus(STATUS.serverError)
+  }
+}

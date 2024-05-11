@@ -2,6 +2,7 @@ import express from "express"
 import { createTask } from "../controllers/taskControllers"
 import { getTasks } from "../controllers/taskControllers";
 import { editTask } from "../controllers/taskControllers";
+import { deleteTask } from "../controllers/taskControllers";
 import { body } from "express-validator";
 
 export const router = express.Router()
@@ -12,7 +13,6 @@ router.route("/add", [
     body("dueDate").trim().notEmpty(),
     body("priority").trim().notEmpty(),
     body("tags").isArray(),
-    body("category").trim().notEmpty()
   ],
 ])
   .post(createTask)
@@ -26,11 +26,14 @@ router.route("/edit/:id", [
     body("dueDate").trim().notEmpty(),
     body("priority").trim().notEmpty(),
     body("tags").isArray(),
-    body("category").trim().notEmpty(),
     body("status").trim().notEmpty(),
     body("note").notEmpty()
   ],
 ])
   .put(editTask)
+
+router.route("/delete/:id")
+  .delete(deleteTask)
+
 
 export default router

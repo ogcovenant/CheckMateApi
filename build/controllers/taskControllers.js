@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editTask = exports.getTasks = exports.createTask = void 0;
+exports.deleteTask = exports.editTask = exports.getTasks = exports.createTask = void 0;
 //route imports
 const dbconfig_1 = __importDefault(require("../config/dbconfig"));
 const statusConfig_1 = __importDefault(require("../config/statusConfig"));
@@ -35,7 +35,6 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         due_date: req.body.dueDate,
         priority: req.body.priority,
         tags: req.body.tags,
-        category: req.body.category,
         no_of_subtasks: 0,
         user_id: req.user.id,
         status: "pending",
@@ -45,8 +44,7 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         !task.title ||
         !task.due_date ||
         !task.priority ||
-        !task.tags ||
-        !task.category) {
+        !task.tags) {
         return res
             .status(statusConfig_1.default.notAcceptable)
             .json({ msg: "Invalid values provided" });
@@ -76,14 +74,6 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 },
             });
         }));
-        //inserting category
-        yield dbconfig_1.default.category.create({
-            data: {
-                id: (0, nanoid_1.nanoid)(),
-                title: task.category,
-                taskId: task.id,
-            },
-        });
     }
     catch (err) {
         console.log(err);
@@ -126,13 +116,7 @@ const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         id: true,
                         title: true,
                     },
-                },
-                category: {
-                    select: {
-                        id: true,
-                        title: true,
-                    },
-                },
+                }
             },
         });
         if (!tasks)
@@ -166,7 +150,6 @@ const editTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         due_date: req.body.dueDate,
         priority: req.body.priority,
         tags: req.body.tags,
-        category: req.body.category,
         status: req.body.status,
         note: req.body.note
     };
@@ -175,7 +158,6 @@ const editTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         !task.due_date ||
         !task.priority ||
         !task.tags ||
-        !task.category ||
         !task.status ||
         !task.note) {
         return res.status(statusConfig_1.default.notAcceptable).json({ msg: "Invalid values provided" });
@@ -204,15 +186,7 @@ const editTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 }
             });
         }));
-        yield dbconfig_1.default.category.update({
-            where: {
-                id: task.category.id
-            },
-            data: {
-                title: task.category.title
-            }
-        });
-        res.sendStatus(statusConfig_1.default.noContent);
+        res.sendStatus(statusConfig_1.default.ok).json({ msg: "Task updated successfully" });
     }
     catch (err) {
         console.log(err);
@@ -221,3 +195,23 @@ const editTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.editTask = editTask;
+const deleteTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const taskId = req.params.id;
+    try {
+        yield dbconfig_1.default.task.delete({
+            where: {
+                id: taskId,
+            }
+        });
+        // await db.tag.deleteMany({
+        //   where:{
+        //     taskId: taskId
+        //   }
+        // })
+        res.status(statusConfig_1.default.noContent).json({ msg: "Task Deleted Successfully" });
+    }
+    catch (err) {
+        return res.sendStatus(statusConfig_1.default.serverError);
+    }
+});
+exports.deleteTask = deleteTask;
