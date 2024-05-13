@@ -16,7 +16,7 @@ exports.router.route("/add", [
         (0, express_validator_1.body)("title").trim().notEmpty(),
         (0, express_validator_1.body)("dueDate").trim().notEmpty(),
         (0, express_validator_1.body)("priority").trim().notEmpty(),
-        (0, express_validator_1.body)("tags").isArray(),
+        (0, express_validator_1.body)("note").notEmpty()
     ],
 ])
     .post(taskControllers_1.createTask);
@@ -27,7 +27,6 @@ exports.router.route("/edit/:id", [
         (0, express_validator_1.body)("title").trim().notEmpty(),
         (0, express_validator_1.body)("dueDate").trim().notEmpty(),
         (0, express_validator_1.body)("priority").trim().notEmpty(),
-        (0, express_validator_1.body)("tags").isArray(),
         (0, express_validator_1.body)("status").trim().notEmpty(),
         (0, express_validator_1.body)("note").notEmpty()
     ],

@@ -12,7 +12,7 @@ router.route("/add", [
     body("title").trim().notEmpty(),
     body("dueDate").trim().notEmpty(),
     body("priority").trim().notEmpty(),
-    body("tags").isArray(),
+    body("note").notEmpty()
   ],
 ])
   .post(createTask)
@@ -25,7 +25,6 @@ router.route("/edit/:id", [
     body("title").trim().notEmpty(),
     body("dueDate").trim().notEmpty(),
     body("priority").trim().notEmpty(),
-    body("tags").isArray(),
     body("status").trim().notEmpty(),
     body("note").notEmpty()
   ],

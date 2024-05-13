@@ -24,8 +24,7 @@ export const createTask = async (req, res) => {
     title: req.body.title,
     due_date: req.body.dueDate,
     priority: req.body.priority,
-    tags: req.body.tags,
-    no_of_subtasks: 0,
+    note: req.body.note,
     user_id: req.user.id,
     status: "pending",
   };
@@ -36,7 +35,7 @@ export const createTask = async (req, res) => {
     !task.title ||
     !task.due_date ||
     !task.priority ||
-    !task.tags
+    !task.note
   ) {
     return res
       .status(STATUS.notAcceptable)
@@ -53,24 +52,10 @@ export const createTask = async (req, res) => {
         dueDate: task.due_date,
         priority: task.priority,
         userId: task.user_id,
-        noOfSubtasks: task.no_of_subtasks,
         status: task.status,
+        note: task.note
       },
     });
-
-    //inserting tags
-    const tags = task.tags;
-
-    tags.forEach(async (tag) => {
-      await db.tag.create({
-        data: {
-          id: nanoid(),
-          title: tag,
-          taskId: task.id,
-        },
-      });
-    });
-
   } catch (err) {
     console.log(err);
     //returning a server error status if an issue occurs with the operation
@@ -89,6 +74,7 @@ export const createTask = async (req, res) => {
       },
     });
   } catch (err) {
+    console.log(err);
     //returning a server error status if an issue occurs with the operation
     return res.sendStatus(STATUS.serverError);
   }
@@ -109,15 +95,7 @@ export const getTasks = async (req, res) => {
     const tasks = await db.task.findMany({
       where: {
         userId: userId,
-      },
-      include: {
-        tags: {
-          select: {
-            id: true,
-            title: true,
-          },
-        }
-      },
+      }
     });
 
     if (!tasks)
@@ -155,7 +133,6 @@ export const editTask = async (req, res) => {
     title: req.body.title,
     due_date: req.body.dueDate,
     priority: req.body.priority,
-    tags: req.body.tags,
     status: req.body.status,
     note: req.body.note
   };
@@ -165,7 +142,6 @@ export const editTask = async (req, res) => {
     !task.title ||
     !task.due_date ||
     !task.priority ||
-    !task.tags ||
     !task.status ||
     !task.note
   ){
@@ -184,18 +160,6 @@ export const editTask = async (req, res) => {
         status: task.status,
         note: task.note
       },
-    });
-
-    const tags = task.tags;
-    tags.forEach(async(tag) => {
-      await db.tag.update({
-        where: {
-          id: tag.id
-        },
-        data:{
-          title: tag.title
-        }
-      })
     });
 
     res.sendStatus(STATUS.ok).json({ msg: "Task updated successfully" })

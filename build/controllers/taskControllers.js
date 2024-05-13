@@ -34,8 +34,7 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         title: req.body.title,
         due_date: req.body.dueDate,
         priority: req.body.priority,
-        tags: req.body.tags,
-        no_of_subtasks: 0,
+        note: req.body.note,
         user_id: req.user.id,
         status: "pending",
     };
@@ -44,7 +43,7 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         !task.title ||
         !task.due_date ||
         !task.priority ||
-        !task.tags) {
+        !task.note) {
         return res
             .status(statusConfig_1.default.notAcceptable)
             .json({ msg: "Invalid values provided" });
@@ -59,21 +58,10 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 dueDate: task.due_date,
                 priority: task.priority,
                 userId: task.user_id,
-                noOfSubtasks: task.no_of_subtasks,
                 status: task.status,
+                note: task.note
             },
         });
-        //inserting tags
-        const tags = task.tags;
-        tags.forEach((tag) => __awaiter(void 0, void 0, void 0, function* () {
-            yield dbconfig_1.default.tag.create({
-                data: {
-                    id: (0, nanoid_1.nanoid)(),
-                    title: tag,
-                    taskId: task.id,
-                },
-            });
-        }));
     }
     catch (err) {
         console.log(err);
@@ -93,6 +81,7 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
     }
     catch (err) {
+        console.log(err);
         //returning a server error status if an issue occurs with the operation
         return res.sendStatus(statusConfig_1.default.serverError);
     }
@@ -109,15 +98,7 @@ const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const tasks = yield dbconfig_1.default.task.findMany({
             where: {
                 userId: userId,
-            },
-            include: {
-                tags: {
-                    select: {
-                        id: true,
-                        title: true,
-                    },
-                }
-            },
+            }
         });
         if (!tasks)
             return res
@@ -149,7 +130,6 @@ const editTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         title: req.body.title,
         due_date: req.body.dueDate,
         priority: req.body.priority,
-        tags: req.body.tags,
         status: req.body.status,
         note: req.body.note
     };
@@ -157,7 +137,6 @@ const editTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!task.title ||
         !task.due_date ||
         !task.priority ||
-        !task.tags ||
         !task.status ||
         !task.note) {
         return res.status(statusConfig_1.default.notAcceptable).json({ msg: "Invalid values provided" });
@@ -175,17 +154,6 @@ const editTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 note: task.note
             },
         });
-        const tags = task.tags;
-        tags.forEach((tag) => __awaiter(void 0, void 0, void 0, function* () {
-            yield dbconfig_1.default.tag.update({
-                where: {
-                    id: tag.id
-                },
-                data: {
-                    title: tag.title
-                }
-            });
-        }));
         res.sendStatus(statusConfig_1.default.ok).json({ msg: "Task updated successfully" });
     }
     catch (err) {
